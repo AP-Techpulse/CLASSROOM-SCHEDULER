@@ -249,6 +249,135 @@
             letter-spacing: 1px;
         }
         
+        .workload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .workload-card {
+            background: white;
+            border: 2px solid var(--sand);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .workload-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: var(--golden);
+        }
+        
+        .workload-card.active {
+            border-color: var(--deep-green);
+            background: rgba(26, 77, 46, 0.05);
+        }
+        
+        .workload-card.inactive {
+            opacity: 0.6;
+        }
+        
+        .workload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .workload-name {
+            font-weight: 600;
+            color: var(--deep-green);
+            font-size: 0.95rem;
+        }
+        
+        .workload-percentage {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .workload-percentage.low {
+            color: #4CAF50;
+        }
+        
+        .workload-percentage.medium {
+            color: var(--golden);
+        }
+        
+        .workload-percentage.high {
+            color: var(--terracotta);
+        }
+        
+        .workload-percentage.full {
+            color: #9A3B3B;
+        }
+        
+        .workload-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--sand);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .workload-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .workload-bar-fill.low {
+            background: linear-gradient(90deg, #4CAF50, #66BB6A);
+        }
+        
+        .workload-bar-fill.medium {
+            background: linear-gradient(90deg, var(--golden), #FFB74D);
+        }
+        
+        .workload-bar-fill.high {
+            background: linear-gradient(90deg, var(--terracotta), #FF7043);
+        }
+        
+        .workload-bar-fill.full {
+            background: linear-gradient(90deg, #9A3B3B, #D32F2F);
+        }
+        
+        .workload-hours {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .workload-status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .workload-status.available {
+            background: rgba(76, 175, 80, 0.2);
+            color: #2E7D32;
+        }
+        
+        .workload-status.busy {
+            background: rgba(232, 167, 64, 0.2);
+            color: #CC8A00;
+        }
+        
+        .workload-status.full {
+            background: rgba(193, 80, 46, 0.2);
+            color: #9A3B3B;
+        }
+        
+        .workload-status.idle {
+            background: rgba(158, 158, 158, 0.2);
+            color: #757575;
+        }
+        
         .hidden {
             display: none;
         }
@@ -375,6 +504,14 @@
                     <div class="stat-value" id="totalSessions">0</div>
                     <div class="stat-label">Total Sessions</div>
                 </div>
+            </div>
+            
+            <!-- Lecturer Workload Dashboard -->
+            <div style="margin-top: 30px;">
+                <h3 style="color: var(--deep-green); margin-bottom: 20px; font-family: 'Playfair Display', serif;">
+                    Lecturer's Workload
+                </h3>
+                <div id="lecturerWorkloadDashboard"></div>
             </div>
             
             <div id="scheduleTableContainer"></div>
@@ -686,6 +823,9 @@
             document.getElementById('successRate').textContent = result.stats.successRate + '%';
             document.getElementById('totalSessions').textContent = result.stats.totalSessions;
             
+            // Display lecturer workload dashboard
+            displayLecturerWorkload(result.lecturerHours);
+            
             // Display schedule by level
             const container = document.getElementById('scheduleTableContainer');
             let html = '';
@@ -743,6 +883,68 @@
             
             // Scroll to results
             document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function displayLecturerWorkload(lecturerHours) {
+            const container = document.getElementById('lecturerWorkloadDashboard');
+            
+            let html = '<div class="workload-grid">';
+            
+            Object.entries(lecturerHours).forEach(([name, data]) => {
+                const percentage = data.available > 0 ? (data.used / data.available * 100) : 0;
+                const roundedPercentage = Math.round(percentage);
+                
+                // Determine status and class
+                let statusClass = 'idle';
+                let statusText = 'Not Assigned';
+                let barClass = 'low';
+                let percentageClass = 'low';
+                let cardClass = 'inactive';
+                
+                if (data.used > 0) {
+                    cardClass = 'active';
+                    if (percentage >= 100) {
+                        statusClass = 'full';
+                        statusText = 'Fully Booked';
+                        barClass = 'full';
+                        percentageClass = 'full';
+                    } else if (percentage >= 75) {
+                        statusClass = 'busy';
+                        statusText = 'Nearly Full';
+                        barClass = 'high';
+                        percentageClass = 'high';
+                    } else if (percentage >= 50) {
+                        statusClass = 'busy';
+                        statusText = 'Moderate Load';
+                        barClass = 'medium';
+                        percentageClass = 'medium';
+                    } else {
+                        statusClass = 'available';
+                        statusText = 'Available';
+                        barClass = 'low';
+                        percentageClass = 'low';
+                    }
+                }
+                
+                html += `
+                    <div class="workload-card ${cardClass}">
+                        <div class="workload-header">
+                            <div class="workload-name">${name}</div>
+                            <div class="workload-percentage ${percentageClass}">${roundedPercentage}%</div>
+                        </div>
+                        <div class="workload-bar">
+                            <div class="workload-bar-fill ${barClass}" style="width: ${Math.min(percentage, 100)}%"></div>
+                        </div>
+                        <div class="workload-hours">
+                            ${data.used} / ${data.available} hours used
+                        </div>
+                        <span class="workload-status ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
         }
         
         function downloadData() {
