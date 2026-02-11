@@ -38,13 +38,16 @@ TIME_SLOTS = [
 
 # Classrooms available in CS Department
 CLASSROOMS = [
-    {"name": "Software Lab", "capacity": 90},
-    {"name": "Hardware Lab", "capacity": 80},
-    {"name": "CS Lecture Hall 1", "capacity": 200},
-    {"name": "CS Lecture Hall 2", "capacity": 150},
-    {"name": "Tutorial Room A", "capacity": 50},
-    {"name": "Tutorial Room B", "capacity": 50},
-    {"name": "Seminar Room", "capacity": 100},
+    {"name": "Software Lab", "capacity": 120},
+    {"name": "Hardware Lab", "capacity": 100},
+    {"name": "New Hall A", "capacity": 200},
+    {"name": "New Hall B", "capacity": 200},
+    {"name": "New Hall C", "capacity": 200},
+    {"name": "DESOPADEC Hall", "capacity": 250},
+    {"name": "750 Seaters Hall A", "capacity": 250},
+    {"name": "750 Seaters Hall B", "capacity": 250},
+    {"name": "Sandwich Hall", "capacity": 250},
+    {"name": "Predegree Hall", "capacity": 100}
 ]
 
 # CS Department Levels
